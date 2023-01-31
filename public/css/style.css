@@ -8,3 +8,7 @@ nav {
     display: flex;
     height: 10vh;
 }
+
+.lista{
+    text-decoration: none;
+}

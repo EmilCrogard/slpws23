@@ -1,0 +1,12 @@
+h2 Excersises:
+
+
+
+ol
+    - @result.each do |exercise|
+        a href="exercises/#{exercise['Id']}" #{exercise["title"]} 
+        a href="exercises/#{exercise['Id']}/edit" uppdatera
+        form method="POST" action="excercises/#{exercise['Id']}/delete"
+         input type="submit" value="Delete"
+
+
