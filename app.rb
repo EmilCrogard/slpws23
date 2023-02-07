@@ -15,14 +15,7 @@ end
 get('/exercises') do
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
-    @chest = db.execute("SELECT * FROM exercise_muscles_rel INNER JOIN exercise on exercise_muscles_rel.exercise_id = exercise.Id WHERE muscle_id = 1")
-    @Core = db.execute("SELECT * FROM exercise_muscles_rel INNER JOIN exercise on exercise_muscles_rel.exercise_id = exercise.Id WHERE muscle_id = 2")
-    @legs = db.execute("SELECT * FROM exercise_muscles_rel INNER JOIN exercise on exercise_muscles_rel.exercise_id = exercise.Id WHERE muscle_id = 3")
-    @Tricep = db.execute("SELECT * FROM exercise_muscles_rel INNER JOIN exercise on exercise_muscles_rel.exercise_id = exercise.Id WHERE muscle_id = 4")
-    @Bicep = db.execute("SELECT * FROM exercise_muscles_rel INNER JOIN exercise on exercise_muscles_rel.exercise_id = exercise.Id WHERE muscle_id = 5")
-    @Shoulders = db.execute("SELECT * FROM exercise_muscles_rel INNER JOIN exercise on exercise_muscles_rel.exercise_id = exercise.Id WHERE muscle_id = 6")
-    @Back = db.execute("SELECT * FROM exercise_muscles_rel INNER JOIN exercise on exercise_muscles_rel.exercise_id = exercise.Id WHERE muscle_id = 7")
-    p @Back
+    @result = db.execute("SELECT * FROM exercise_muscles_rel INNER JOIN exercise on exercise_muscles_rel.exercise_id = exercise.Id")
     slim(:"/exercise/exercises")
 end
 
@@ -32,11 +25,12 @@ end
 
 post('/exercises/new') do
     title = params[:title]
-    artist_id = params[:content]
+    content = params[:content]
     muscle_id = params[:muscle]
-    p muscle_id
     db = SQLite3::Database.new("db/database.db")
     db.execute("INSERT INTO exercise (title, content) VALUES (?,?)",title, content)
+    exercise_id = db.execute("SELECT Id FROM exercise WHERE title = ?",title)
+    db.execute("INSERT INTO exercise_muscles_rel (exercise_id, muscle_id) VALUES (?,?)", exercise_id, muscle_id)
     redirect('/exercises')
 end
 

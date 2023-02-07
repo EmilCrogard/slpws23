@@ -1,60 +1,16 @@
 h2 Excersises:
 
-a href="exercises/new" add
 
-h3 Chest:
-ol
-    - @chest.each do |exercise|
-        a href="exercises/#{exercise['Id']}" #{exercise["title"]} 
-        a href="exercises/#{exercise['Id']}/edit" uppdatera
-        form method="POST" action="excercises/#{exercise['Id']}/delete"
-         input type="submit" value="Delete"
 
-h3 Core:
-ol
-    - @Core.each do |exercise|
-        a href="exercises/#{exercise['Id']}" #{exercise["title"]} 
-        a href="exercises/#{exercise['Id']}/edit" uppdatera
-        form method="POST" action="excercises/#{exercise['Id']}/delete"
-         input type="submit" value="Delete"
+a href="exercises/new" 
+    button Add New Exercise
+    
 
-h3 Legs:
-
-ol
-    - @legs.each do |exercise|
-        a href="exercises/#{exercise['Id']}" #{exercise["title"]} 
-        a href="exercises/#{exercise['Id']}/edit" uppdatera
-        form method="POST" action="excercises/#{exercise['Id']}/delete"
-         input type="submit" value="Delete"
-
-h3 Tricep:
-ol
-    - @Tricep.each do |exercise|
-        a href="exercises/#{exercise['Id']}" #{exercise["title"]} 
-        a href="exercises/#{exercise['Id']}/edit" uppdatera
-        form method="POST" action="excercises/#{exercise['Id']}/delete"
-         input type="submit" value="Delete"
-
-h3 Bicep:
-ol
-    - @Bicep.each do |exercise|
-        a href="exercises/#{exercise['Id']}" #{exercise["title"]} 
-        a href="exercises/#{exercise['Id']}/edit" uppdatera
-        form method="POST" action="excercises/#{exercise['Id']}/delete"
-         input type="submit" value="Delete"
-
-h3 Shoulders:
-ol
-    - @Shoulders.each do |exercise|
-        a href="exercises/#{exercise['Id']}" #{exercise["title"]} 
-        a href="exercises/#{exercise['Id']}/edit" uppdatera
-        form method="POST" action="excercises/#{exercise['Id']}/delete"
-         input type="submit" value="Delete"
-
-h3 back:
-ol
-    - @Back.each do |exercise|
-        a href="exercises/#{exercise['Id']}" #{exercise["title"]} 
-        a href="exercises/#{exercise['Id']}/edit" uppdatera
-        form method="POST" action="excercises/#{exercise['Id']}/delete"
-         input type="submit" value="Delete"
+main
+    - @result.each do |exercise|
+        article.exercise_article
+            div.exercise_info
+                a href="exercises/#{exercise['Id']}" #{exercise["title"]} 
+                a href="exercises/#{exercise['Id']}/edit" uppdatera
+                form method="POST" action="excercises/#{exercise['Id']}/delete"
+                input type="submit" value="Delete"

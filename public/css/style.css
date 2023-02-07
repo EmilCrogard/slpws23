@@ -9,6 +9,13 @@ nav {
     height: 10vh;
 }
 
-.lista{
-    text-decoration: none;
+.exercise_info {
+    background-color: blueviolet;
+}
+
+.exercise_article {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: aqua;
 }
