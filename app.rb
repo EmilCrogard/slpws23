@@ -63,10 +63,26 @@ get('/exercises/:id') do
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
     @result = db.execute("SELECT * FROM exercise WHERE Id = ?",id).first
-    p @result
     slim(:"/exercise/show")
 end
 
 get('/workout') do
-    slim(:workout)
+    db = SQLite3::Database.new("db/database.db")
+    db.results_as_hash = true
+    @workout = db.execute("SELECT * FROM workout_exercise_rel INNER JOIN workouts on workout_exercise_rel.workout_id = workouts.Id")
+    p @workout
+    slim(:"/workout/workouts")
+end
+
+get('/workout/new') do
+    slim(:"/workout/new")
+end
+
+get('/workout/:id') do
+    id = params[:id].to_i
+    db = SQLite3::Database.new("db/database.db")
+    db.results_as_hash = true
+    @workout = db.execute("SELECT * FROM workout_exercise_rel INNER JOIN exercise on workout_exercise_rel.exercise_id = exercise.Id")
+    p @workout
+    slim(:"/workout/show")
 end

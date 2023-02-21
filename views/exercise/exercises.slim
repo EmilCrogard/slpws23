@@ -10,7 +10,7 @@ main
     - @result.each do |exercise|
         article.exercise_article
             div.exercise_info
-                a href="exercises/#{exercise['Id']}" #{exercise["title"]} 
-                a href="exercises/#{exercise['Id']}/edit" uppdatera
+                a.exercise_tag href="exercises/#{exercise['Id']}" #{exercise["title"]} 
+                a.exercise_tag href="exercises/#{exercise['Id']}/edit" uppdatera
                 form method="POST" action="excercises/#{exercise['Id']}/delete"
                 input type="submit" value="Delete"

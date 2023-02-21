@@ -1,0 +1,7 @@
+h2 Workout-log
+
+main
+    - @workout.each do |workout|
+        article.exercise_article
+            div.exercise_info
+                a.exercise_tag href="workout/#{workout['Id']}" #{workout["Title"]} 
