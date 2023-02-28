@@ -75,6 +75,9 @@ get('/workout') do
 end
 
 get('/workout/new') do
+    db = SQLite3::Database.new("db/database.db")
+    db.results_as_hash = true
+    @result = db.execute("SELECT * FROM exercise")
     slim(:"/workout/new")
 end
 
@@ -83,6 +86,24 @@ get('/workout/:id') do
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
     @workout = db.execute("SELECT * FROM workout_exercise_rel INNER JOIN exercise on workout_exercise_rel.exercise_id = exercise.Id")
-    p @workout
     slim(:"/workout/show")
+end
+
+post('/workout/new') do
+    title = params[:title]
+    workout_select_1 = params[:workout_select_1].to_i
+    workout_select_2 = params[:workout_select_2].to_i
+    workout_select_3 = params[:workout_select_3].to_i
+    workout_select_4 = params[:workout_select_4].to_i
+    workout_select_5 = params[:workout_select_5].to_i
+    p title = params[:title]
+    p workout_select_1 
+    p workout_select_2 
+    p workout_select_3 
+    p workout_select_4 
+    p workout_select_5
+    db = SQLite3::Database.new("db/database.db")
+    db.execute("INSERT INTO workouts (Title) VALUES (?)"title)
+
+    redirect('/workout')
 end

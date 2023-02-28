@@ -1,3 +1,4 @@
-h2 hej
-
-p #{@workout}
+- @workout.each do |workout|
+    p #{workout['title']} 
+    p Number of sets #{workout['set']}
+    br
