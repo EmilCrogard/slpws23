@@ -34,7 +34,7 @@ post('/exercises/new') do
     redirect('/exercises')
 end
 
-post('/exercises/:id/update') do
+post('/exercises/:id/delete') do
     id = params[:id].to_i 
     db = SQLite3::Database.new("db/database.db")
     db.execute("DELETE FROM exercise WHERE Id =?",id)
@@ -48,7 +48,7 @@ post('/exercises/:id/update') do
     db = SQLite3::Database.new("db/database.db")
     db.execute("UPDATE exercise SET title=?,content=? WHERE Id = ?",title,content,id)
     redirect('/exercises') 
-  end
+end
 
 get('/exercises/:id/edit') do
     id = params[:id].to_i
@@ -69,8 +69,7 @@ end
 get('/workout') do
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
-    @workout = db.execute("SELECT * FROM workout_exercise_rel INNER JOIN workouts on workout_exercise_rel.workout_id = workouts.Id")
-    p @workout
+    @workout = db.execute("select * FROM workouts")
     slim(:"/workout/workouts")
 end
 
@@ -96,14 +95,21 @@ post('/workout/new') do
     workout_select_3 = params[:workout_select_3].to_i
     workout_select_4 = params[:workout_select_4].to_i
     workout_select_5 = params[:workout_select_5].to_i
-    p title = params[:title]
-    p workout_select_1 
-    p workout_select_2 
-    p workout_select_3 
-    p workout_select_4 
-    p workout_select_5
+    array_workout = [workout_select_1, workout_select_2, workout_select_3, workout_select_4, workout_select_5]
+    set_1 = params[:set_1].to_i
+    set_2 = params[:set_2].to_i
+    set_3 = params[:set_3].to_i
+    set_4 = params[:set_4].to_i
+    set_5 = params[:set_5].to_i
+    array_set = [set_1, set_2, set_3, set_4, set_5]
     db = SQLite3::Database.new("db/database.db")
-    db.execute("INSERT INTO workouts (Title) VALUES (?)"title)
-
+    db.execute("INSERT INTO workouts (Title) VALUES (?)",title)
+    workout_id = db.execute("SELECT Id FROM workouts WHERE title = ?",title)
+    i = 0
+    array_workout.each do |workout_select|
+        db.execute("INSERT INTO workout_exercise_rel (workout_id, exercise_id, set_) VALUES (?,?,?)",workout_id, workout_select, array_set[i])
+        i+=1
+    end
+    i = 0
     redirect('/workout')
 end
