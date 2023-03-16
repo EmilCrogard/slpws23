@@ -43,10 +43,12 @@ end
 
 post('/exercises/:id/update') do
     id = params[:id].to_i 
+    muscle_id = params[:muscle].to_i
     title = params[:title]
     content = params[:content]
     db = SQLite3::Database.new("db/database.db")
     db.execute("UPDATE exercise SET title=?,content=? WHERE Id = ?",title,content,id)
+    db.execute("UPDATE exercise_muscles_rel SET muscle_id=? WHERE exercise_id = ?",muscle_id,id)
     redirect('/exercises') 
 end
 
@@ -63,6 +65,10 @@ get('/exercises/:id') do
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
     @result = db.execute("SELECT * FROM exercise WHERE Id = ?",id).first
+    #@muscle = ("SELECT muscles.muscle_name 
+                #FROM (exercise_muscles_rel 
+                    #INNER JOIN muscles ON exercise_muscles_rel.muscle_id = muscles.Id)
+                #WHERE exercise_id = ?", id)
     slim(:"/exercise/show")
 end
 
@@ -84,7 +90,7 @@ get('/workout/:id') do
     id = params[:id].to_i
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
-    @workout = db.execute("SELECT * FROM workout_exercise_rel INNER JOIN exercise on workout_exercise_rel.exercise_id = exercise.Id")
+    @workout = db.execute("SELECT * FROM workout_exercise_rel INNER JOIN exercise on workout_exercise_rel.exercise_id = exercise.Id WHERE workout_id =?", id)
     slim(:"/workout/show")
 end
 
