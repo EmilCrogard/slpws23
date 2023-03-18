@@ -12,6 +12,48 @@ get('/login') do
     slim(:login)
 end
 
+post('/login') do 
+    username = params[:username]
+    password = params[:password]
+    p username, password
+    db = SQLite3::Database.new('db/database.db')
+    db.results_as_hash = true
+    result = db.execute("SELECT * FROM users WHERE username = ?",username).first
+
+    if result
+
+        pwdigest = result["pwdigest"]
+    
+        if BCrypt::Password.new(pwdigest) == password
+          id = result["id"]
+          redirect('/workout')
+        else 
+          "FEL LÖSEN!"
+        end
+      else 
+        "ICKE EXISTERANDE ANVÄNDARNAMN!"
+      end
+    
+end
+
+post('/users/new') do
+    username = params[:username]
+    password = params[:password]
+    password_confirm = params[:password_confirm]
+    p username, password, password_confirm
+    if (password == password_confirm)
+        #lägg till användare
+        password_digest = BCrypt::Password.create(password)
+        p password_digest
+        db = SQLite3::Database.new('db/database.db')
+        db.execute("INSERT INTO users (username,pwdigest) VALUES (?,?)",username,password_digest)
+        redirect('/workout')
+      else
+        #felhantering
+        "Lösenorden matchade inte!"
+      end
+end
+
 get('/exercises') do
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
@@ -117,5 +159,27 @@ post('/workout/new') do
         i+=1
     end
     i = 0
+    redirect('/workout')
+end
+
+get('/workout/:id/edit') do
+    id = params[:id].to_i
+    db = SQLite3::Database.new("db/database.db")
+    db.results_as_hash = true
+    @result = db.execute("SELECT * FROM exercise")
+    @workout = db.execute("SELECT * FROM workouts WHERE Id = ?",id).first
+    slim(:"/workout/edit")
+end
+
+post('/workout/:id/update') do
+    id = params[:id].to_i 
+    db = SQLite3::Database.new("db/database.db")
+    redirect('/workout') 
+end
+
+post('/workout/:id/delete') do
+    id = params[:id].to_i 
+    db = SQLite3::Database.new("db/database.db")
+    db.execute("DELETE FROM workouts WHERE Id =?",id)
     redirect('/workout')
 end
