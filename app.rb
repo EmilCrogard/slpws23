@@ -4,18 +4,26 @@ require 'slim'
 require 'sqlite3'
 require 'bcrypt'
 
+enable :sessions
+
 get('/') do
-    slim(:register)
+    if session[:id] == nil
+        redirect('/register')
+    end
+    redirect('/workout')
 end
 
 get('/login') do
     slim(:login)
 end
 
+get('/register') do
+    slim(:register)
+end
+
 post('/login') do 
     username = params[:username]
     password = params[:password]
-    p username, password
     db = SQLite3::Database.new('db/database.db')
     db.results_as_hash = true
     result = db.execute("SELECT * FROM users WHERE username = ?",username).first
@@ -25,31 +33,30 @@ post('/login') do
         pwdigest = result["pwdigest"]
     
         if BCrypt::Password.new(pwdigest) == password
-          id = result["id"]
+          session[:id] = result["id"]
           redirect('/workout')
         else 
           "FEL LÖSEN!"
         end
       else 
         "ICKE EXISTERANDE ANVÄNDARNAMN!"
-      end
-    
+      end 
 end
 
+get('/logout') do
+    session[:id] = nil
+    redirect('/')
+end
 post('/users/new') do
     username = params[:username]
     password = params[:password]
     password_confirm = params[:password_confirm]
-    p username, password, password_confirm
     if (password == password_confirm)
-        #lägg till användare
         password_digest = BCrypt::Password.create(password)
-        p password_digest
         db = SQLite3::Database.new('db/database.db')
         db.execute("INSERT INTO users (username,pwdigest) VALUES (?,?)",username,password_digest)
-        redirect('/workout')
+        redirect('/login')
       else
-        #felhantering
         "Lösenorden matchade inte!"
       end
 end
@@ -107,10 +114,10 @@ get('/exercises/:id') do
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
     @result = db.execute("SELECT * FROM exercise WHERE Id = ?",id).first
-    #@muscle = ("SELECT muscles.muscle_name 
-                #FROM (exercise_muscles_rel 
-                    #INNER JOIN muscles ON exercise_muscles_rel.muscle_id = muscles.Id)
-                #WHERE exercise_id = ?", id)
+    @muscle = db.execute("SELECT muscles.muscle_name 
+                FROM exercise_muscles_rel 
+                    INNER JOIN muscles ON exercise_muscles_rel.muscle_id = muscles.Id
+                WHERE exercise_id = ?", id)
     slim(:"/exercise/show")
 end
 
@@ -132,7 +139,7 @@ get('/workout/:id') do
     id = params[:id].to_i
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
-    @workout = db.execute("SELECT * FROM workout_exercise_rel INNER JOIN exercise on workout_exercise_rel.exercise_id = exercise.Id WHERE workout_id =?", id)
+    @workout = db.execute("SELECT * FROM workout_exercise_rel INNER JOIN exercise ON workout_exercise_rel.exercise_id = exercise.Id WHERE workout_exercise_rel.workout_id =?", id)
     slim(:"/workout/show")
 end
 
@@ -174,6 +181,7 @@ end
 post('/workout/:id/update') do
     id = params[:id].to_i 
     db = SQLite3::Database.new("db/database.db")
+    #Uppdatera databasen
     redirect('/workout') 
 end
 
