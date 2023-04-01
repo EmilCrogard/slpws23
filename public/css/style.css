@@ -52,5 +52,18 @@ body {
 #logo{
     background-color: aqua;
     width: auto;
-    height: 12vh;
+    height: 10px;
+}
+
+.log_reg_div {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    height: 60vh;
+}
+.inner_div{
+    border-radius: 3px;
+    border-style: solid;
+    border-color: rgb(81, 86, 86);
+    padding: 4px;
 }

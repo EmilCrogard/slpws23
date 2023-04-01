@@ -8,7 +8,7 @@ enable :sessions
 
 get('/') do
     if session[:id] == nil
-        redirect('/register')
+        redirect('/login')
     end
     redirect('/workout')
 end
@@ -27,13 +27,12 @@ post('/login') do
     db = SQLite3::Database.new('db/database.db')
     db.results_as_hash = true
     result = db.execute("SELECT * FROM users WHERE username = ?",username).first
-
     if result
 
         pwdigest = result["pwdigest"]
     
         if BCrypt::Password.new(pwdigest) == password
-          session[:id] = result["id"]
+          session[:id] = result["Id"]
           redirect('/workout')
         else 
           "FEL LÖSEN!"
@@ -51,6 +50,7 @@ post('/users/new') do
     username = params[:username]
     password = params[:password]
     password_confirm = params[:password_confirm]
+    #While loop som kollar att användar namnet är unikt. Skicka tillbaka en boolean
     if (password == password_confirm)
         password_digest = BCrypt::Password.create(password)
         db = SQLite3::Database.new('db/database.db')
@@ -62,6 +62,9 @@ post('/users/new') do
 end
 
 get('/exercises') do
+    if session[:id] == nil
+        redirect('/login')
+    end
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
     @result = db.execute("SELECT * FROM exercise_muscles_rel INNER JOIN exercise on exercise_muscles_rel.exercise_id = exercise.Id")
@@ -69,6 +72,9 @@ get('/exercises') do
 end
 
 get('/exercises/new') do
+    if session[:id] == nil
+        redirect('/login')
+    end
     slim(:"/exercise/new")
 end
 
@@ -102,6 +108,9 @@ post('/exercises/:id/update') do
 end
 
 get('/exercises/:id/edit') do
+    if session[:id] == nil
+        redirect('/login')
+    end
     id = params[:id].to_i
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
@@ -110,6 +119,9 @@ get('/exercises/:id/edit') do
 end
 
 get('/exercises/:id') do
+    if session[:id] == nil
+        redirect('/login')
+    end
     id = params[:id].to_i
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
@@ -122,6 +134,9 @@ get('/exercises/:id') do
 end
 
 get('/workout') do
+    if session[:id] == nil
+        redirect('/login')
+    end
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
     @workout = db.execute("select * FROM workouts")
@@ -129,6 +144,9 @@ get('/workout') do
 end
 
 get('/workout/new') do
+    if session[:id] == nil
+        redirect('/login')
+    end
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
     @result = db.execute("SELECT * FROM exercise")
@@ -136,6 +154,9 @@ get('/workout/new') do
 end
 
 get('/workout/:id') do
+    if session[:id] == nil
+        redirect('/login')
+    end
     id = params[:id].to_i
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
@@ -170,6 +191,9 @@ post('/workout/new') do
 end
 
 get('/workout/:id/edit') do
+    if session[:id] == nil
+        redirect('/login')
+    end
     id = params[:id].to_i
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
@@ -181,7 +205,30 @@ end
 post('/workout/:id/update') do
     id = params[:id].to_i 
     db = SQLite3::Database.new("db/database.db")
-    #Uppdatera databasen
+    title = params[:title]
+    workout_select_1 = params[:workout_select_1].to_i
+    workout_select_2 = params[:workout_select_2].to_i
+    workout_select_3 = params[:workout_select_3].to_i
+    workout_select_4 = params[:workout_select_4].to_i
+    workout_select_5 = params[:workout_select_5].to_i
+    array_workout = [workout_select_1, workout_select_2, workout_select_3, workout_select_4, workout_select_5]
+    set_1 = params[:set_1].to_i
+    set_2 = params[:set_2].to_i
+    set_3 = params[:set_3].to_i
+    set_4 = params[:set_4].to_i
+    set_5 = params[:set_5].to_i
+    array_set = [set_1, set_2, set_3, set_4, set_5]
+    #Lägg till validering som ser till att alla värden i ifyllda
+    workout_exercise_rel_id = db.execute("SELECT Id FROM workout_exercise_rel where workout_id=?",id)
+    i = 0
+    array_workout.each do |workout_select|
+        db.execute("UPDATE workouts SET Title=?", title)
+        db.execute("UPDATE workout_exercise_rel SET exercise_id=?, set_=? WHERE Id=?", workout_select, array_set[i], workout_exercise_rel_id[i][0])
+        i+=1
+       
+    end
+    i = 0
+
     redirect('/workout') 
 end
 

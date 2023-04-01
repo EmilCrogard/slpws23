@@ -8,15 +8,13 @@ html lang="en"
         title Document
     body 
         nav 
-            img#logo src="/img/162.jpg" alt="logo"/
-            a.header_tag href="/register" Register
-            a.header_tag href="/login" Login 
-            - if session[:id] != nil 
+            - if session[:id] == nil
+                a.header_tag href="/login" Login 
+            - if session[:id] != nil
                 a.header_tag href="/workout" Workout-log
                 a.header_tag href="/exercises" Exercises
                 a.header_tag href="/logout" logout
 
 
         h1 Welcome to My Gym pal 
-
         == yield 
