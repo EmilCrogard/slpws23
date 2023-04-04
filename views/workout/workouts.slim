@@ -5,9 +5,10 @@ a href="/workout/new"
 
 main
     - @workout.each do |workout|
-        article.exercise_article
-            div.exercise_info
-                a.exercise_tag href="workout/#{workout['Id']}" #{workout["Title"]} 
-                a.exercise_tag href="workout/#{workout['Id']}/edit" uppdatera
-                form method="POST" action="workout/#{workout['Id']}/delete"
-                    input type="submit" value="Delete"
+       - if workout['user_id'] == session[:id]
+            article.exercise_article
+                div.exercise_info
+                    a.exercise_tag href="workout/#{workout['Id']}" #{workout["Title"]} 
+                    a.exercise_tag href="workout/#{workout['Id']}/edit" uppdatera
+                    form method="POST" action="workout/#{workout['Id']}/delete"
+                        input type="submit" value="Delete"

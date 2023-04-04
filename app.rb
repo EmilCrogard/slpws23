@@ -46,19 +46,34 @@ get('/logout') do
     session[:id] = nil
     redirect('/')
 end
+
 post('/users/new') do
     username = params[:username]
     password = params[:password]
     password_confirm = params[:password_confirm]
-    #While loop som kollar att användar namnet är unikt. Skicka tillbaka en boolean
-    if (password == password_confirm)
-        password_digest = BCrypt::Password.create(password)
-        db = SQLite3::Database.new('db/database.db')
-        db.execute("INSERT INTO users (username,pwdigest) VALUES (?,?)",username,password_digest)
-        redirect('/login')
-      else
-        "Lösenorden matchade inte!"
-      end
+    db = SQLite3::Database.new('db/database.db')
+
+    name_array = db.execute("SELECT username FROM users")
+    boolean = true
+    i = 0
+    while name_array.length > i
+        if name_array[i][0] == username
+            boolean = false
+        end
+        i += 1
+    end
+
+    if boolean 
+        if (password == password_confirm) 
+            password_digest = BCrypt::Password.create(password)
+            db.execute("INSERT INTO users (username,pwdigest) VALUES (?,?)",username,password_digest)
+            redirect('/login')
+        else
+            "Lösenorden matchade inte!"
+        end
+    else 
+        "användarnamnet finns redan!"
+    end
 end
 
 get('/exercises') do
@@ -93,6 +108,7 @@ post('/exercises/:id/delete') do
     id = params[:id].to_i 
     db = SQLite3::Database.new("db/database.db")
     db.execute("DELETE FROM exercise WHERE Id =?",id)
+    db.execute("DELETE FROM exercise_muscles_rel WHERE exercise_id =?",id)
     redirect('/exercises')
 end
 
@@ -178,15 +194,16 @@ post('/workout/new') do
     set_4 = params[:set_4].to_i
     set_5 = params[:set_5].to_i
     array_set = [set_1, set_2, set_3, set_4, set_5]
+    user_id = session[:id]
+    #validering som inte lägger till nil i databasen. 
     db = SQLite3::Database.new("db/database.db")
-    db.execute("INSERT INTO workouts (Title) VALUES (?)",title)
+    db.execute("INSERT INTO workouts (Title, user_id) VALUES (?,?)",title, user_id)
     workout_id = db.execute("SELECT Id FROM workouts WHERE title = ?",title)
     i = 0
     array_workout.each do |workout_select|
         db.execute("INSERT INTO workout_exercise_rel (workout_id, exercise_id, set_) VALUES (?,?,?)",workout_id, workout_select, array_set[i])
         i+=1
     end
-    i = 0
     redirect('/workout')
 end
 
@@ -236,5 +253,6 @@ post('/workout/:id/delete') do
     id = params[:id].to_i 
     db = SQLite3::Database.new("db/database.db")
     db.execute("DELETE FROM workouts WHERE Id =?",id)
+    db.execute("DELETE FROM workout_exercise_rel WHERE workout_id =?",id)
     redirect('/workout')
 end

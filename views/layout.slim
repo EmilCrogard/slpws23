@@ -10,10 +10,11 @@ html lang="en"
         nav 
             - if session[:id] == nil
                 a.header_tag href="/login" Login 
+                a.header_tag href="/register" Register 
             - if session[:id] != nil
                 a.header_tag href="/workout" Workout-log
                 a.header_tag href="/exercises" Exercises
-                a.header_tag href="/logout" logout
+                a.header_tag href="/logout" Logout
 
 
         h1 Welcome to My Gym pal 
