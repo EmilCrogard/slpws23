@@ -3,7 +3,7 @@ require 'sinatra/reloader'
 require 'slim'
 require 'sqlite3'
 require 'bcrypt'
-
+require 'sinatra/flash'
 
 
 enable :sessions
@@ -37,15 +37,18 @@ post('/login') do
           session[:id] = result["Id"]
           redirect('/workout')
         else 
-          "FEL LÖSEN!"
+          flash[:notice] = "Wrong password!"
+          redirect('/login')
         end
       else 
-        "ICKE EXISTERANDE ANVÄNDARNAMN!"
+        flash[:notice] = "Username doesn't exist!"
+        redirect('/login')
       end 
 end
 
 get('/logout') do
     session[:id] = nil
+    flash[:notice] = "You have been logged out!"
     redirect('/')
 end
 
@@ -71,10 +74,12 @@ post('/users/new') do
             db.execute("INSERT INTO users (username,pwdigest) VALUES (?,?)",username,password_digest)
             redirect('/login')
         else
-            "Lösenorden matchade inte!"
+            flash[:notice] = "Passwords didn't match!"
+            redirect('/register')
         end
     else 
-        "användarnamnet finns redan!"
+        flash[:notice] = "Username already exists!"
+        redirect('/register')
     end
 end
 
@@ -216,7 +221,8 @@ post('/workout/new') do
         end
         redirect('/workout')
     else
-        "Alla övningar var inte ifyllda"
+        flash[:notice] = "Every exercise wasn't logged!"
+        redirect('/workout/new')
     end
 end
 
@@ -248,7 +254,7 @@ post('/workout/:id/update') do
     set_4 = params[:set_4].to_i
     set_5 = params[:set_5].to_i
     array_set = [set_1, set_2, set_3, set_4, set_5]
-    #Lägg till validering som ser till att alla värden i ifyllda
+    
     boolean = true
     array_workout.each do |validate|
         if validate == 0
@@ -267,7 +273,8 @@ post('/workout/:id/update') do
         end
         redirect('/workout') 
     else 
-        "alla värden var inte ifyllda"
+        flash[:notice] = "Every exercise wasn't logged!"
+        redirect("/workout/#{id}/edit")
     end
 end
 
@@ -276,5 +283,6 @@ post('/workout/:id/delete') do
     db = SQLite3::Database.new("db/database.db")
     db.execute("DELETE FROM workouts WHERE Id =?",id)
     db.execute("DELETE FROM workout_exercise_rel WHERE workout_id =?",id)
+    flash[:notice] = "Workout was deleted"
     redirect('/workout')
 end

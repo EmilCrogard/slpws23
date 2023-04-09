@@ -49,12 +49,6 @@ body {
     font-size: 2rem;
 }
 
-#logo{
-    background-color: aqua;
-    width: auto;
-    height: 10px;
-}
-
 .log_reg_div {
     justify-content: center;
     align-items: center;
@@ -66,4 +60,28 @@ body {
     border-style: solid;
     border-color: rgb(81, 86, 86);
     padding: 4px;
+}
+
+.notice {
+    background:rgba(100,100,100,0.1);
+    width:50vw;
+    padding:40px;
+    position: fixed;
+    font-size:3rem;
+    font-family:Arial, Helvetica, sans-serif;
+    right: 25vw;
+    border-radius: 3px;
+    border-style: solid;
+    border-color: blue;
+    color: blue;
+}
+
+
+#page_name {
+    font-size: 1.5rem;
+    font-family:Arial, Helvetica, sans-serif;
+    color:bisque;
+    border-radius: 3px;
+    border-style: solid;
+    border-color: bisque;
 }
