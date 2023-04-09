@@ -5,8 +5,8 @@ form action="/workout/new" method="post"
     br
     label for="workout_select" choose an exercise: 
     br
-    select#select_style name="workout_select_1"  
-        option value="" Choose an option
+    select#select_style name="workout_select_1"
+        option value="#{0}" Choose an option
         - @result.each do |exercise|
             option value="#{exercise["Id"]}" #{exercise["title"]}
     br
@@ -17,7 +17,7 @@ form action="/workout/new" method="post"
     label for="workout_select" choose a exercise: 
     br
     select#select_style name="workout_select_2"  
-        option value="" Choose an option
+        option value="#{0}" Choose an option
         - @result.each do |exercise|
             option value="#{exercise["Id"]}" #{exercise["title"]} 
     br
@@ -28,7 +28,7 @@ form action="/workout/new" method="post"
     label for="workout_select" choose a exercise: 
     br
     select#select_style name="workout_select_3"  
-        option value="" Choose an option
+        option value="#{0}" Choose an option
         - @result.each do |exercise|
             option value="#{exercise["Id"]}" #{exercise["title"]} 
     br
@@ -39,7 +39,7 @@ form action="/workout/new" method="post"
     label for="workout_select" choose a exercise: 
     br
     select#select_style name="workout_select_4"  
-        option value="" Choose an option
+        option value="#{0}" Choose an option
         - @result.each do |exercise|
             option value="#{exercise["Id"]}" #{exercise["title"]} 
     br
@@ -50,7 +50,7 @@ form action="/workout/new" method="post"
     label for="workout_select" choose a exercise: 
     br
     select#select_style name="workout_select_5" 
-        option value="" Choose an option 
+        option value="#{0}" Choose an option 
         - @result.each do |exercise|
             option value="#{exercise["Id"]}" #{exercise["title"]} 
      

@@ -1,61 +1,61 @@
 form  action="/workout/#{@workout['Id']}/update" method="post"
     label for="title" Edit the date of the workout:
     br
-    input type="date" name="title"  
+    <input type="date" name="title" required>
     br
     label for="workout_select" choose an exercise: 
     br
     select#select_style name="workout_select_1"  
-        option value="" Choose an option
+        option value="#{0}" Choose an option
         - @result.each do |exercise|
             option value="#{exercise["Id"]}" #{exercise["title"]}
     br
     label for="set" Input number of sets
     br 
-    input type="number" name="set_1" min="1" max="10"/ 
+    <input type="number" name="set_1" min="1" max="10" required>
     br  
     label for="workout_select" choose a exercise: 
     br
-    select#select_style name="workout_select_2"  
-        option value="" Choose an option
+    select#select_style name="workout_select_2"
+        option value="#{0}" Choose an option
         - @result.each do |exercise|
             option value="#{exercise["Id"]}" #{exercise["title"]} 
     br
     label for="set" Input number of sets
     br 
-    input type="number" name="set_2" min="1" max="10"/
+    <input type="number" name="set_2" min="1" max="10" required>
     br
     label for="workout_select" choose a exercise: 
     br
     select#select_style name="workout_select_3"  
-        option value="" Choose an option
+        option value="#{0}" Choose an option
         - @result.each do |exercise|
             option value="#{exercise["Id"]}" #{exercise["title"]} 
     br
     label for="set" Input number of sets
     br 
-    input type="number" name="set_3" min="1" max="10"/
+    <input type="number" name="set_3" min="1" max="10" required>
     br
     label for="workout_select" choose a exercise: 
     br
     select#select_style name="workout_select_4"  
-        option value="" Choose an option
+        option value="#{0}" Choose an option
         - @result.each do |exercise|
             option value="#{exercise["Id"]}" #{exercise["title"]} 
     br
     label for="set" Input number of sets
     br 
-    input type="number" name="set_4" min="1" max="10"/
+    <input type="number" name="set_4" min="1" max="10" required>
     br
     label for="workout_select" choose a exercise: 
     br
     select#select_style name="workout_select_5"  
-        option value="" Choose an option
+        option value="#{0}" Choose an option
         - @result.each do |exercise|
             option value="#{exercise["Id"]}" #{exercise["title"]} 
     br
     label for="set" Input number of sets
     br 
-    input type="number" name="set_5" min="1" max="10"/
+    <input type="number" name="set_5" min="1" max="10" required>
     br
     input type="submit" value="Update Workout"

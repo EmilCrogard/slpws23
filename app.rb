@@ -4,6 +4,8 @@ require 'slim'
 require 'sqlite3'
 require 'bcrypt'
 
+
+
 enable :sessions
 
 get('/') do
@@ -195,16 +197,27 @@ post('/workout/new') do
     set_5 = params[:set_5].to_i
     array_set = [set_1, set_2, set_3, set_4, set_5]
     user_id = session[:id]
-    #validering som inte lägger till nil i databasen. 
-    db = SQLite3::Database.new("db/database.db")
-    db.execute("INSERT INTO workouts (Title, user_id) VALUES (?,?)",title, user_id)
-    workout_id = db.execute("SELECT Id FROM workouts WHERE title = ?",title)
-    i = 0
-    array_workout.each do |workout_select|
-        db.execute("INSERT INTO workout_exercise_rel (workout_id, exercise_id, set_) VALUES (?,?,?)",workout_id, workout_select, array_set[i])
-        i+=1
+
+    boolean = true
+    array_workout.each do |validate|
+        if validate == 0
+            boolean = false
+        end
     end
-    redirect('/workout')
+    
+    if boolean 
+        db = SQLite3::Database.new("db/database.db")
+        db.execute("INSERT INTO workouts (Title, user_id) VALUES (?,?)",title, user_id)
+        workout_id = db.execute("SELECT Id FROM workouts WHERE title = ?",title)
+        i = 0
+        array_workout.each do |workout_select|
+            db.execute("INSERT INTO workout_exercise_rel (workout_id, exercise_id, set_) VALUES (?,?,?)",workout_id, workout_select, array_set[i])
+            i+=1
+        end
+        redirect('/workout')
+    else
+        "Alla övningar var inte ifyllda"
+    end
 end
 
 get('/workout/:id/edit') do
@@ -236,17 +249,26 @@ post('/workout/:id/update') do
     set_5 = params[:set_5].to_i
     array_set = [set_1, set_2, set_3, set_4, set_5]
     #Lägg till validering som ser till att alla värden i ifyllda
-    workout_exercise_rel_id = db.execute("SELECT Id FROM workout_exercise_rel where workout_id=?",id)
-    i = 0
-    array_workout.each do |workout_select|
-        db.execute("UPDATE workouts SET Title=?", title)
-        db.execute("UPDATE workout_exercise_rel SET exercise_id=?, set_=? WHERE Id=?", workout_select, array_set[i], workout_exercise_rel_id[i][0])
-        i+=1
-       
+    boolean = true
+    array_workout.each do |validate|
+        if validate == 0
+            boolean = false
+        end
     end
-    i = 0
 
-    redirect('/workout') 
+    if boolean
+        workout_exercise_rel_id = db.execute("SELECT Id FROM workout_exercise_rel where workout_id=?",id)
+        i = 0
+        array_workout.each do |workout_select|
+            db.execute("UPDATE workouts SET Title=?", title)
+            db.execute("UPDATE workout_exercise_rel SET exercise_id=?, set_=? WHERE Id=?", workout_select, array_set[i], workout_exercise_rel_id[i][0])
+            i+=1
+        
+        end
+        redirect('/workout') 
+    else 
+        "alla värden var inte ifyllda"
+    end
 end
 
 post('/workout/:id/delete') do
