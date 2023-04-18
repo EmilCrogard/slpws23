@@ -4,7 +4,7 @@ require 'slim'
 require 'sqlite3'
 require 'bcrypt'
 require 'sinatra/flash'
-
+require_relative './model.rb'
 
 enable :sessions
 
@@ -26,24 +26,12 @@ end
 post('/login') do 
     username = params[:username]
     password = params[:password]
-    db = SQLite3::Database.new('db/database.db')
-    db.results_as_hash = true
-    result = db.execute("SELECT * FROM users WHERE username = ?",username).first
-    if result
-
-        pwdigest = result["pwdigest"]
-    
-        if BCrypt::Password.new(pwdigest) == password
-          session[:id] = result["Id"]
-          redirect('/workout')
-        else 
-          flash[:notice] = "Wrong password!"
-          redirect('/login')
-        end
-      else 
-        flash[:notice] = "Username doesn't exist!"
+    re_route = login_user(username, password)
+    if re_route = 1
+        redirect('/workout')
+    elsif re_route = 2
         redirect('/login')
-      end 
+    end
 end
 
 get('/logout') do
@@ -56,29 +44,10 @@ post('/users/new') do
     username = params[:username]
     password = params[:password]
     password_confirm = params[:password_confirm]
-    db = SQLite3::Database.new('db/database.db')
-
-    name_array = db.execute("SELECT username FROM users")
-    boolean = true
-    i = 0
-    while name_array.length > i
-        if name_array[i][0] == username
-            boolean = false
-        end
-        i += 1
-    end
-
-    if boolean 
-        if (password == password_confirm) 
-            password_digest = BCrypt::Password.create(password)
-            db.execute("INSERT INTO users (username,pwdigest) VALUES (?,?)",username,password_digest)
-            redirect('/login')
-        else
-            flash[:notice] = "Passwords didn't match!"
-            redirect('/register')
-        end
-    else 
-        flash[:notice] = "Username already exists!"
+    re_route = register_user(username, password, password_confirm)
+    if re_route = 1
+        redirect('/login')
+    elsif re_route = 2
         redirect('/register')
     end
 end
@@ -87,9 +56,7 @@ get('/exercises') do
     if session[:id] == nil
         redirect('/login')
     end
-    db = SQLite3::Database.new("db/database.db")
-    db.results_as_hash = true
-    @result = db.execute("SELECT * FROM exercise_muscles_rel INNER JOIN exercise on exercise_muscles_rel.exercise_id = exercise.Id")
+    get_exercises()
     slim(:"/exercise/exercises")
 end
 
@@ -104,10 +71,7 @@ post('/exercises/new') do
     title = params[:title]
     content = params[:content]
     muscle_id = params[:muscle]
-    db = SQLite3::Database.new("db/database.db")
-    db.execute("INSERT INTO exercise (title, content) VALUES (?,?)",title, content)
-    exercise_id = db.execute("SELECT Id FROM exercise WHERE title = ?",title)
-    db.execute("INSERT INTO exercise_muscles_rel (exercise_id, muscle_id) VALUES (?,?)", exercise_id, muscle_id)
+    new_exercise(title, content, muscle_id)
     redirect('/exercises')
 end
 
