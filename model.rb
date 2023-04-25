@@ -1,4 +1,9 @@
 
+#Attempts to login user
+#
+#@param [string] username The username
+#@param [string] password The password
+#@ return [integer]
 def login_user(username, password)
     db = SQLite3::Database.new('db/database.db')
     db.results_as_hash = true
@@ -20,6 +25,12 @@ def login_user(username, password)
     end 
 end
 
+#Attempts to create new user
+#
+#@param [string] username The username
+#@param [string] password The password
+#@param [string] password_confirm The repeated password
+#@ return [integer]
 def register_user(username, password, password_confirm)
     db = SQLite3::Database.new('db/database.db')
     name_array = db.execute("SELECT username FROM users")
@@ -48,6 +59,8 @@ def register_user(username, password, password_confirm)
     end
 end
 
+#Gets 
+#
 def get_exercises()
     db = SQLite3::Database.new("db/database.db")
     db.results_as_hash = true
@@ -61,3 +74,111 @@ def new_exercise(title, content, muscle_id)
     db.execute("INSERT INTO exercise_muscles_rel (exercise_id, muscle_id) VALUES (?,?)", exercise_id, muscle_id)
 end
 
+def delete_exercises(id)
+    db = SQLite3::Database.new("db/database.db")
+    db.execute("DELETE FROM exercise WHERE Id =?",id)
+    db.execute("DELETE FROM exercise_muscles_rel WHERE exercise_id =?",id)
+end
+
+def update_exercises(id, muscle_id, title, content)
+    db = SQLite3::Database.new("db/database.db")
+    db.execute("UPDATE exercise SET title=?,content=? WHERE Id = ?",title,content,id)
+    db.execute("UPDATE exercise_muscles_rel SET muscle_id=? WHERE exercise_id = ?",muscle_id,id)
+end
+
+def get_show_exercise(id)
+    db = SQLite3::Database.new("db/database.db")
+    db.results_as_hash = true
+    @result = db.execute("SELECT * FROM exercise WHERE Id = ?",id).first
+    @muscle = db.execute("SELECT muscles.muscle_name 
+                FROM exercise_muscles_rel 
+                    INNER JOIN muscles ON exercise_muscles_rel.muscle_id = muscles.Id
+                WHERE exercise_id = ?", id)
+end
+
+def get_exercise_with_id(id)
+    db = SQLite3::Database.new("db/database.db")
+    db.results_as_hash = true
+    @result = db.execute("SELECT * FROM exercise WHERE Id = ?",id).first
+end
+
+def get_all_workouts()
+    db = SQLite3::Database.new("db/database.db")
+    db.results_as_hash = true
+    @workout = db.execute("select * FROM workouts")
+end
+
+def get_all_exercise()
+    db = SQLite3::Database.new("db/database.db")
+    db.results_as_hash = true
+    @result = db.execute("SELECT * FROM exercise")
+end
+
+def get_workout_info(id)
+    db = SQLite3::Database.new("db/database.db")
+    db.results_as_hash = true
+    @workout = db.execute("SELECT * FROM workout_exercise_rel INNER JOIN exercise ON workout_exercise_rel.exercise_id = exercise.Id WHERE workout_exercise_rel.workout_id =?", id)
+end
+
+
+def add_workout(array_workout, array_set, user_id, title)
+    boolean = true
+    array_workout.each do |validate|
+        if validate == 0
+            boolean = false
+        end
+    end
+    
+    if boolean 
+        db = SQLite3::Database.new("db/database.db")
+        db.execute("INSERT INTO workouts (Title, user_id) VALUES (?,?)",title, user_id)
+        workout_id = db.execute("SELECT Id FROM workouts WHERE title = ?",title)
+        i = 0
+        array_workout.each do |workout_select|
+            db.execute("INSERT INTO workout_exercise_rel (workout_id, exercise_id, set_) VALUES (?,?,?)",workout_id, workout_select, array_set[i])
+            i+=1
+        end
+        return 1
+    else
+        flash[:notice] = "Every exercise wasn't logged!"
+        return 2 
+    end
+end
+
+def get_workout_and_exercises(id)
+    db = SQLite3::Database.new("db/database.db")
+    db.results_as_hash = true
+    @result = db.execute("SELECT * FROM exercise")
+    @workout = db.execute("SELECT * FROM workouts WHERE Id = ?",id).first
+end
+
+def update_workouts(array_set, array_workout, title, id)
+    db = SQLite3::Database.new("db/database.db")
+    boolean = true
+    array_workout.each do |validate|
+        if validate == 0
+            boolean = false
+        end
+    end
+
+    if boolean
+        workout_exercise_rel_id = db.execute("SELECT Id FROM workout_exercise_rel where workout_id=?",id)
+        i = 0
+        array_workout.each do |workout_select|
+            db.execute("UPDATE workouts SET Title=?", title)
+            db.execute("UPDATE workout_exercise_rel SET exercise_id=?, set_=? WHERE Id=?", workout_select, array_set[i], workout_exercise_rel_id[i][0])
+            i+=1
+        end
+        return 1 
+    else 
+        flash[:notice] = "Every exercise wasn't logged!"
+        return 2
+    end
+end
+
+def workout_delete(id)
+    db = SQLite3::Database.new("db/database.db")
+    db.execute("DELETE FROM workouts WHERE Id =?",id)
+    db.execute("DELETE FROM workout_exercise_rel WHERE workout_id =?",id)
+    flash[:notice] = "Workout was deleted"
+end
