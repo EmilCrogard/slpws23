@@ -8,6 +8,10 @@ require_relative './model.rb'
 
 enable :sessions
 
+include Model 
+
+# Redirects to '/workout' if logged in otherwise edirects to '/login'
+#
 get('/') do
     if session[:id] == nil
         redirect('/login')
@@ -15,14 +19,24 @@ get('/') do
     redirect('/workout')
 end
 
+# Displays a login form
+#
 get('/login') do
     slim(:login)
 end
 
+# Displays a register form
+#
 get('/register') do
     slim(:register)
 end
 
+# Attempts login and updates the session
+#
+# @param [String] username, The username
+# @param [String] password, The password
+#
+# @see Model#login_user
 post('/login') do 
     username = params[:username]
     password = params[:password]
@@ -41,6 +55,13 @@ get('/logout') do
     redirect('/')
 end
 
+# Attempts to register a new user and redirects to '/login'
+#
+# @param [String] username, The username
+# @param [String] password, The password
+# @param [String] password_confirm, The repeated password
+#
+# @see Model#register_user
 post('/users/new') do
     username = params[:username]
     password = params[:password]
@@ -53,6 +74,9 @@ post('/users/new') do
     end
 end
 
+# Displays all exercises
+#
+# @see Model#get_exercises 
 get('/exercises') do
     if session[:id] == nil
         redirect('/login')
@@ -61,6 +85,9 @@ get('/exercises') do
     slim(:"/exercise/exercises")
 end
 
+
+# Displays a form to add a new exercise
+#
 get('/exercises/new') do
     if session[:id] == nil
         redirect('/login')
@@ -68,6 +95,13 @@ get('/exercises/new') do
     slim(:"/exercise/new")
 end
 
+# Attempts to add a new exercise and redirect to '/exercises'
+#
+# @param [String] title, The title of the exercise
+# @param [String] content, The information
+# @param [Integer] muscle_id, The ID of the muscle 
+#
+# @see Model#new_exercise
 post('/exercises/new') do
     title = params[:title]
     content = params[:content]
@@ -76,12 +110,25 @@ post('/exercises/new') do
     redirect('/exercises')
 end
 
+# Deletes an existing exercise and redirects to '/exercises'
+#
+# @param [Integer] :id, The ID of the exercise 
+#
+# @see Model#delete_exercises
 post('/exercises/:id/delete') do
     id = params[:id].to_i 
     delete_exercises(id)
     redirect('/exercises')
 end
 
+# Updates an existing exercise and redirects to '/exercises'
+#
+# @param [Integer] :id, The ID of the exercise
+# @param [String] title, The title of the exercise
+# @param [String] content, The information
+# @param [Integer] muscle_id, The ID of the muscle 
+#
+# @see Model#update_exercises
 post('/exercises/:id/update') do
     id = params[:id].to_i 
     muscle_id = params[:muscle].to_i
@@ -91,6 +138,12 @@ post('/exercises/:id/update') do
     redirect('/exercises') 
 end
 
+
+# Displays a form to edit a specific exercise 
+#
+# @param [Integer] :id, The ID of the exercise
+#
+# @see Model#get_exercise_with_id
 get('/exercises/:id/edit') do
     if session[:id] == nil
         redirect('/login')
@@ -100,6 +153,11 @@ get('/exercises/:id/edit') do
     slim(:"/exercise/edit")
 end
 
+#Displays a single exercise 
+#
+# @param [Integer] :id, The ID of the exercise
+#
+# @see Model#get_show_exercise
 get('/exercises/:id') do
     if session[:id] == nil
         redirect('/login')
@@ -109,6 +167,9 @@ get('/exercises/:id') do
     slim(:"/exercise/show")
 end
 
+# Displays all workouts 
+#
+# @see Model#get_all_workouts 
 get('/workout') do
     if session[:id] == nil
         redirect('/login')
@@ -117,6 +178,9 @@ get('/workout') do
     slim(:"/workout/workouts")
 end
 
+# Displays a form to add a new exercise
+#
+# @see Model#get_all_exercise
 get('/workout/new') do
     if session[:id] == nil
         redirect('/login')
@@ -125,6 +189,11 @@ get('/workout/new') do
     slim(:"/workout/new")
 end
 
+#Displays a single workout 
+#
+# @param [Integer] :id, The ID of the workout
+#
+# @see Model#get_workout_info
 get('/workout/:id') do
     if session[:id] == nil
         redirect('/login')
@@ -134,6 +203,22 @@ get('/workout/:id') do
     slim(:"/workout/show")
 end
 
+# Attempts to add a new workout and redirect to '/workout'
+#
+# @param [String] title, The title of the workout
+# @param [Integer] workout_select_1, The ID of the chosen exercise
+# @param [Integer] workout_select_2, The ID of the chosen exercise
+# @param [Integer] workout_select_3, The ID of the chosen exercise
+# @param [Integer] workout_select_4, The ID of the chosen exercise
+# @param [Integer] workout_select_5, The ID of the chosen exercise
+#
+# @param [Integer] set_1, Number of sets
+# @param [Integer] set_2, Number of sets
+# @param [Integer] set_3, Number of sets
+# @param [Integer] set_4, Number of sets
+# @param [Integer] set_5, Number of sets
+#
+# @see Model#add_workout
 post('/workout/new') do
     title = params[:title]
     workout_select_1 = params[:workout_select_1].to_i
@@ -159,6 +244,11 @@ post('/workout/new') do
     end
 end
 
+# Displays a form to edit a specific workout 
+#
+# @param [Integer] :id, The ID of the workout
+#
+# @see Model#get_workout_and_exercises
 get('/workout/:id/edit') do
     if session[:id] == nil
         redirect('/login')
@@ -168,6 +258,23 @@ get('/workout/:id/edit') do
     slim(:"/workout/edit")
 end
 
+# Updates an existing workout and redirects to '/workout'
+#
+# @param [Integer] :id, The ID of the workout
+# @param [String] title, The title of the workout
+# @param [Integer] workout_select_1, The ID of the chosen exercise
+# @param [Integer] workout_select_2, The ID of the chosen exercise
+# @param [Integer] workout_select_3, The ID of the chosen exercise
+# @param [Integer] workout_select_4, The ID of the chosen exercise
+# @param [Integer] workout_select_5, The ID of the chosen exercise
+#
+# @param [Integer] set_1, Number of sets
+# @param [Integer] set_2, Number of sets
+# @param [Integer] set_3, Number of sets
+# @param [Integer] set_4, Number of sets
+# @param [Integer] set_5, Number of sets
+#
+# @see Model#update_workouts
 post('/workout/:id/update') do
     id = params[:id].to_i 
     title = params[:title]
@@ -193,8 +300,20 @@ post('/workout/:id/update') do
     end
 end
 
+# Deletes an existing workout and redirects to '/workout'
+#
+# @param [Integer] :id, The ID of the workout 
+#
+# @see Model#workout_delete
 post('/workout/:id/delete') do
     id = params[:id].to_i 
     workout_delete(id)
+    redirect('/workout')
+end
+
+# Catches error 404 and redirects to '/workout'
+#
+not_found do
+    flash[:notice] = "404 page not found"
     redirect('/workout')
 end
