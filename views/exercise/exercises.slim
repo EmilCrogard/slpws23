@@ -11,6 +11,7 @@ main
         article.exercise_article
             div.exercise_info
                 a.exercise_tag href="exercises/#{exercise['Id']}" #{exercise["title"]} 
-                a.exercise_tag href="exercises/#{exercise['Id']}/edit" uppdatera
-                form method="POST" action="exercises/#{exercise['Id']}/delete"
-                    input type="submit" value="Delete"
+                - if session[:id] == 8
+                    a.exercise_tag href="admin/exercises/#{exercise['Id']}/edit" uppdatera
+                    form method="POST" action="admin/exercises/#{exercise['Id']}/delete"
+                        input type="submit" value="Delete"

@@ -10,7 +10,36 @@ enable :sessions
 
 include Model 
 
-# Redirects to '/workout' if logged in otherwise edirects to '/login'
+#Before block that checks if user is admin on specific routes
+#
+before('/admin/*') do 
+    if session[:id] != 8
+        flash[:notice] = "You do not have acces to this route"
+        redirect('/exercises')
+    end
+end
+
+#Before block that checks if user is logged in on workout routes
+#
+before('/workout/*') do
+    session[:login_message] = ""
+    if session[:id] == nil
+        flash[:notice] = "You need to login"
+        redirect('/login')
+    end
+end
+
+#Before block that checks if user is logged in on exercises routes
+#
+before('/exercises/*') do
+    session[:login_message] = ""
+    if session[:id] == nil
+        flash[:notice] = "You need to login"
+        redirect('/login')
+    end
+end
+
+# Redirects to '/workout' if logged in otherwise redirects to '/login'
 #
 get('/') do
     if session[:id] == nil
@@ -28,6 +57,7 @@ end
 # Displays a register form
 #
 get('/register') do
+    session[:login_message] = ""
     slim(:register)
 end
 
@@ -38,6 +68,7 @@ end
 #
 # @see Model#login_user
 post('/login') do 
+    cooldown()
     username = params[:username]
     password = params[:password]
     re_route = login_user(username, password)
@@ -63,6 +94,7 @@ end
 #
 # @see Model#register_user
 post('/users/new') do
+    cooldown()
     username = params[:username]
     password = params[:password]
     password_confirm = params[:password_confirm]
@@ -79,6 +111,7 @@ end
 # @see Model#get_exercises 
 get('/exercises') do
     if session[:id] == nil
+        flash[:notice] = "You need to login"
         redirect('/login')
     end
     get_exercises()
@@ -89,9 +122,6 @@ end
 # Displays a form to add a new exercise
 #
 get('/exercises/new') do
-    if session[:id] == nil
-        redirect('/login')
-    end
     slim(:"/exercise/new")
 end
 
@@ -115,7 +145,7 @@ end
 # @param [Integer] :id, The ID of the exercise 
 #
 # @see Model#delete_exercises
-post('/exercises/:id/delete') do
+post('/admin/exercises/:id/delete') do
     id = params[:id].to_i 
     delete_exercises(id)
     redirect('/exercises')
@@ -129,7 +159,7 @@ end
 # @param [Integer] muscle_id, The ID of the muscle 
 #
 # @see Model#update_exercises
-post('/exercises/:id/update') do
+post('/admin/exercises/:id/update') do
     id = params[:id].to_i 
     muscle_id = params[:muscle].to_i
     title = params[:title]
@@ -144,10 +174,7 @@ end
 # @param [Integer] :id, The ID of the exercise
 #
 # @see Model#get_exercise_with_id
-get('/exercises/:id/edit') do
-    if session[:id] == nil
-        redirect('/login')
-    end
+get('/admin/exercises/:id/edit') do
     id = params[:id].to_i
     get_exercise_with_id(id)
     slim(:"/exercise/edit")
@@ -159,9 +186,6 @@ end
 #
 # @see Model#get_show_exercise
 get('/exercises/:id') do
-    if session[:id] == nil
-        redirect('/login')
-    end
     id = params[:id].to_i
     get_show_exercise(id)
     slim(:"/exercise/show")
@@ -172,6 +196,7 @@ end
 # @see Model#get_all_workouts 
 get('/workout') do
     if session[:id] == nil
+        flash[:notice] = "You need to login"
         redirect('/login')
     end
     get_all_workouts()
@@ -182,9 +207,6 @@ end
 #
 # @see Model#get_all_exercise
 get('/workout/new') do
-    if session[:id] == nil
-        redirect('/login')
-    end
     get_all_exercise()
     slim(:"/workout/new")
 end
@@ -195,10 +217,11 @@ end
 #
 # @see Model#get_workout_info
 get('/workout/:id') do
-    if session[:id] == nil
-        redirect('/login')
-    end
     id = params[:id].to_i
+    if get_workout_user(id)[0][0] != session[:id]
+        flash[:notice] = "You dont have access to this workout"
+        redirect('/workout')
+    end
     get_workout_info(id)
     slim(:"/workout/show")
 end
@@ -250,10 +273,11 @@ end
 #
 # @see Model#get_workout_and_exercises
 get('/workout/:id/edit') do
-    if session[:id] == nil
-        redirect('/login')
-    end
     id = params[:id].to_i
+    if get_workout_user(id)[0][0] != session[:id]
+        flash[:notice] = "You dont have access to this workout"
+        redirect('/workout')
+    end
     get_workout_and_exercises(id)
     slim(:"/workout/edit")
 end
@@ -277,6 +301,10 @@ end
 # @see Model#update_workouts
 post('/workout/:id/update') do
     id = params[:id].to_i 
+    if get_workout_user(id)[0][0] != session[:id]
+        flash[:notice] = "You dont have access to this workout"
+        redirect('/workout')
+    end
     title = params[:title]
     workout_select_1 = params[:workout_select_1].to_i
     workout_select_2 = params[:workout_select_2].to_i
@@ -307,6 +335,10 @@ end
 # @see Model#workout_delete
 post('/workout/:id/delete') do
     id = params[:id].to_i 
+    if get_workout_user(id)[0][0] != session[:id]
+        flash[:notice] = "You dont have access to this workout"
+        redirect('/workout')
+    end
     workout_delete(id)
     redirect('/workout')
 end
@@ -316,4 +348,37 @@ end
 not_found do
     flash[:notice] = "404 page not found"
     redirect('/workout')
+end
+
+#Function that stops the user from trying to login too many times during a short period of time
+#
+def cooldown()
+
+    if session[:login_lock] == "true" && Time.now.to_i - session[:login_lock_time].to_i < 30
+        session[:time] = []
+        session[:login_message] = "You do not have access to login, #{30 - (Time.now.to_i - session[:login_lock_time].to_i)} seconds left"
+        redirect('/login')
+    end
+
+    session[:login_lock] = "" 
+
+    timenow = Time.now
+    if session[:time] == nil
+      session[:time] = [timenow]
+    else
+      session[:time].prepend(timenow)
+    end
+    timediff = timenow.to_i-session[:time][1].to_i
+    if timediff < 4 && session[:time].length > 1
+        sleep(2)
+    end
+
+    if session[:time].length > 3
+        if Time.now.to_i - session[:time][3].to_i < 20
+            session[:login_message] = "You do not have access to login, 30 seconds"
+            session[:login_lock_time] = Time.now
+            session[:login_lock] = "true" 
+        end
+    end
+
 end

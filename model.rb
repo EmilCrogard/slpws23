@@ -59,6 +59,13 @@ module Model
         end
     end
 
+    def get_workout_user(id)
+        db = SQLite3::Database.new("db/database.db")
+        result = db.execute("SELECT user_id FROM workouts WHERE id = ?", id)
+        return result 
+    end
+
+
     # Gets all exercises from exercise_muscles_rel INNER JOIN exercise 
     #
     def get_exercises()
