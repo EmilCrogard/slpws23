@@ -59,6 +59,8 @@ module Model
         end
     end
 
+    # Gets user for a specific workout
+    #
     def get_workout_user(id)
         db = SQLite3::Database.new("db/database.db")
         result = db.execute("SELECT user_id FROM workouts WHERE id = ?", id)
